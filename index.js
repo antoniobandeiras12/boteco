@@ -1,7 +1,7 @@
 import express from "express";
 import bodyParser from "body-parser";
 import { Client, GatewayIntentBits } from "discord.js";
-import "dotenv/config"; 
+import "dotenv/config";
 
 const TOKEN = process.env.BOT_TOKEN;
 const CANAL_ID = process.env.CANAL_ID;
@@ -41,7 +41,6 @@ app.post("/enviar", async (req, res) => {
 ━━━━━━━━━━━━━━━━━━━━━━
 
 👤 **Enviado por:** ${d.nome_enviou} - ${d.patente_enviou}
-
 🚓 **Prefixo da Viatura:** ${d.prefixo}
 
 🧑‍✈️ **Chefe de Barca:** ${d.chefe_nome} - ${d.chefe_patente}
@@ -53,18 +52,24 @@ app.post("/enviar", async (req, res) => {
 ⏱️ **Início da Patrulha:** ${d.inicio}
 ⏱️ **Fim da Patrulha:** ${d.fim}
 
-📦 **APREENSÕES**
-• 💊 Drogas: ${d.drogas}
-• 🔫 Armamentos: ${d.armas}
-• 🛠 Lockpicks: ${d.lockpicks}
-• 💵 Dinheiro Sujo: ${d.dinheiro}
+📦 **APREENSÕES / RESULTADOS**
+• 📟 Total de Ocorrências Atendidas: ${d.total_ocorrencias}
+• 💊 Drogas Apreendidas: ${d.drogas_apreendidas}
+• 💵 Dinheiro Sujo Apreendido: ${d.dinheiro_sujo_apreendido}
+• 🔫 Armamento Apreendido: ${d.armamento_apreendido}
+• 🧨 Bombas Apreendidas: ${d.bombas_apreendidas}
+• 🔫 Munição Apreendida: ${d.municao_apreendida}
+• 🛠️ Lockpicks Apreendidas: ${d.lockpicks_apreendidas}
 
 📑 **PROCEDIMENTOS**
-• 📄 B.O’s Realizados: ${d.bos}
-• 🔗 Prisões Realizadas: ${d.prisoes}
+• 👮‍♂️ Relação de Detidos / B.O:  
+${d.relacao_detidos_bo}
 
-📝 **Observações Gerais:**
-${d.obs}
+⚡ **Ações Realizadas pela Equipe:**  
+${d.acoes_realizadas}
+
+📝 **Observações Gerais:**  
+${d.observacoes}
 
 ━━━━━━━━━━━━━━━━━━━━━━
 📅 Enviado em: ${new Date().toLocaleString("pt-BR")}
