@@ -1,9 +1,20 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-const { Client, GatewayIntentBits } = require("discord.js");
+import express from "express";
+import bodyParser from "body-parser";
+import { Client, GatewayIntentBits } from "discord.js";
+import "dotenv/config"; 
 
 const TOKEN = process.env.BOT_TOKEN;
 const CANAL_ID = process.env.CANAL_ID;
+
+if (!TOKEN) {
+    console.error("❌ ERRO: BOT_TOKEN não foi encontrado nas variáveis do Railway.");
+    process.exit(1);
+}
+
+if (!CANAL_ID) {
+    console.error("❌ ERRO: CANAL_ID não foi encontrado nas variáveis do Railway.");
+    process.exit(1);
+}
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -18,7 +29,7 @@ const client = new Client({
 });
 
 client.once("ready", () => {
-    console.log(`Bot online como ${client.user.tag}`);
+    console.log(`🤖 Bot online como ${client.user.tag}`);
 });
 
 app.post("/enviar", async (req, res) => {
@@ -45,33 +56,34 @@ app.post("/enviar", async (req, res) => {
 📦 **APREENSÕES**
 • 💊 Drogas: ${d.drogas}
 • 🔫 Armamentos: ${d.armas}
-• 🛠️ Lockpicks: ${d.lockpicks}
-• 💵 Dinheiro sujo: ${d.dinheiro}
+• 🛠 Lockpicks: ${d.lockpicks}
+• 💵 Dinheiro Sujo: ${d.dinheiro}
 
 📑 **PROCEDIMENTOS**
 • 📄 B.O’s Realizados: ${d.bos}
 • 🔗 Prisões Realizadas: ${d.prisoes}
 
-📝 **Observações Gerais:**  
+📝 **Observações Gerais:**
 ${d.obs}
 
 ━━━━━━━━━━━━━━━━━━━━━━
-📅 Enviado em: ${new Date().toLocaleString()}
+📅 Enviado em: ${new Date().toLocaleString("pt-BR")}
         `;
 
         const canal = await client.channels.fetch(CANAL_ID);
         await canal.send(msg);
 
         res.json({ status: "ok", message: "Relatório enviado ao Discord." });
-        
+
     } catch (err) {
-        console.error(err);
+        console.error("❌ ERRO AO ENVIAR RELATÓRIO:", err);
         res.status(500).json({ error: "Erro ao enviar relatório" });
     }
 });
 
-app.listen(process.env.PORT || 3000, () =>
-    console.log("API rodando na porta:", process.env.PORT || 3000)
-);
+const PORTA = process.env.PORT || 3000;
+app.listen(PORTA, () => {
+    console.log("🚀 API rodando na porta:", PORTA);
+});
 
 client.login(TOKEN);
