@@ -6,13 +6,8 @@ import "dotenv/config";
 const TOKEN = process.env.BOT_TOKEN;
 const CANAL_ID = process.env.CANAL_ID;
 
-if (!TOKEN) {
-    console.error("❌ ERRO: BOT_TOKEN não foi encontrado nas variáveis do Railway.");
-    process.exit(1);
-}
-
-if (!CANAL_ID) {
-    console.error("❌ ERRO: CANAL_ID não foi encontrado nas variáveis do Railway.");
+if (!TOKEN || !CANAL_ID) {
+    console.error("❌ BOT_TOKEN ou CANAL_ID faltando.");
     process.exit(1);
 }
 
@@ -36,47 +31,74 @@ app.post("/enviar", async (req, res) => {
     try {
         const d = req.body;
 
-        const msg = `
-📋 **RELATÓRIO DIÁRIO DE PATRULHA**
-━━━━━━━━━━━━━━━━━━━━━━
+        // 📌 EMBED OFICIAL (resumo, profissional, militar)
+        const embed = {
+            color: 0x2b2d31,
+            title: "📘 RELATÓRIO DIÁRIO DE PATRULHA",
+            description: "3º Batalhão de Policiamento de Choque – Humaitá",
+            fields: [
+                {
+                    name: "👤 Enviado por",
+                    value: `${d.nome_enviou} — ${d.patente_enviou}`
+                },
+                {
+                    name: "🚓 Prefixo da Viatura",
+                    value: d.prefixo
+                },
+                {
+                    name: "👥 Efetivo da Guarnição",
+                    value:
+                        `• **Chefe:** ${d.chefe_nome} — ${d.chefe_patente}\n` +
+                        `• **Motorista:** ${d.motorista_nome} — ${d.motorista_patente}\n` +
+                        `• **3º Homem:** ${d.t3_nome} — ${d.t3_patente}\n` +
+                        `• **4º Homem:** ${d.t4_nome} — ${d.t4_patente}\n` +
+                        `• **5º Homem:** ${d.t5_nome} — ${d.t5_patente}`
+                },
+                {
+                    name: "⏱ Horários",
+                    value: `**Início:** ${d.inicio}\n**Fim:** ${d.fim}`
+                },
+                {
+                    name: "📦 Ocorrências e Apreensões",
+                    value:
+                        `• Ocorrências Atendidas: **${d.total_ocorrencias}**\n` +
+                        `• Drogas: **${d.drogas_apreendidas}**\n` +
+                        `• Dinheiro Sujo: **${d.dinheiro_sujo_apreendido}**\n` +
+                        `• Armamentos: **${d.armamento_apreendido}**\n` +
+                        `• Munição: **${d.municao_apreendida}**\n` +
+                        `• Bombas: **${d.bombas_apreendidas}**\n` +
+                        `• Lockpicks: **${d.lockpicks_apreendidas}**`
+                }
+            ],
+            footer: {
+                text: "Relatório de Guarnição • BPChoque Humaitá",
+                icon_url: "https://i.imgur.com/PEsQ9z4.png"
+            },
+            timestamp: new Date()
+        };
 
-👤 **Enviado por:** ${d.nome_enviou} - ${d.patente_enviou}
-🚓 **Prefixo da Viatura:** ${d.prefixo}
+        // 📌 BLOCO DE TEXTO DETALHADO
+        const textoDetalhado = `
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📝 **DETALHAMENTO DO RELATÓRIO**
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-🧑‍✈️ **Chefe de Barca:** ${d.chefe_nome} - ${d.chefe_patente}
-👨‍✈️ **Motorista:** ${d.motorista_nome} - ${d.motorista_patente}
-👮‍♂️ **Terceiro Homem:** ${d.t3_nome} - ${d.t3_patente}
-👮‍♂️ **Quarto Homem:** ${d.t4_nome} - ${d.t4_patente}
-👮‍♂️ **Quinto Homem:** ${d.t5_nome} - ${d.t5_patente}
+📄 **Relação de Detidos e B.O**
+${d.relacao_detidos_bo || "Nenhuma informação"}
 
-⏱️ **Início da Patrulha:** ${d.inicio}
-⏱️ **Fim da Patrulha:** ${d.fim}
+🛡 **Ações Realizadas pela Equipe**
+${d.acoes_realizadas || "Nenhuma ação registrada"}
 
-📦 **APREENSÕES / RESULTADOS**
-• 📟 Total de Ocorrências Atendidas: ${d.total_ocorrencias}
-• 💊 Drogas Apreendidas: ${d.drogas_apreendidas}
-• 💵 Dinheiro Sujo Apreendido: ${d.dinheiro_sujo_apreendido}
-• 🔫 Armamento Apreendido: ${d.armamento_apreendido}
-• 🧨 Bombas Apreendidas: ${d.bombas_apreendidas}
-• 🔫 Munição Apreendida: ${d.municao_apreendida}
-• 🛠️ Lockpicks Apreendidas: ${d.lockpicks_apreendidas}
+🗒 **Observações**
+${d.observacoes || "Sem observações registradas"}
 
-📑 **PROCEDIMENTOS**
-• 👮‍♂️ Relação de Detidos / B.O:  
-${d.relacao_detidos_bo}
-
-⚡ **Ações Realizadas pela Equipe:**  
-${d.acoes_realizadas}
-
-📝 **Observações Gerais:**  
-${d.observacoes}
-
-━━━━━━━━━━━━━━━━━━━━━━
-📅 Enviado em: ${new Date().toLocaleString("pt-BR")}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📅 **Enviado em:** ${new Date().toLocaleString("pt-BR")}
         `;
 
         const canal = await client.channels.fetch(CANAL_ID);
-        await canal.send(msg);
+        await canal.send({ embeds: [embed] });
+        await canal.send(textoDetalhado);
 
         res.json({ status: "ok", message: "Relatório enviado ao Discord." });
 
@@ -86,9 +108,9 @@ ${d.observacoes}
     }
 });
 
-const PORTA = process.env.PORT || 3000;
-app.listen(PORTA, () => {
-    console.log("🚀 API rodando na porta:", PORTA);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log("🚀 API rodando na porta:", PORT);
 });
 
 client.login(TOKEN);
